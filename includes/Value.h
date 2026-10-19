@@ -19,7 +19,19 @@
  *  - Roi (King)
  */
 typedef enum Value {
-    EMPTY_VALUE
+    ACE = 1,
+    TWO,
+    THREE,
+    FOUR,
+    FIVE,
+    SIX,
+    SEVEN,
+    EIGHT,
+    NINE,
+    TEN,
+    JACK,
+    QUEEN,
+    KING
 } Value;
 
 /**

@@ -55,7 +55,7 @@ En cas de doute, vous pouvez compiler le projet entier avec la commande
 suivante :
 
 ```bash
-gcc -std=c99 -Wall -Werror -Iincludes -o main src/Utils.c \
+gcc -std=c99 -Wall -Werror -Wno-uninitialized -Iincludes -o main src/Utils.c \
 src/Value.c src/Suit.c src/Action.c src/Card.c src/Deck.c \
 src/Player.c src/Game.c main.c
 ```

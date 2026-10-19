@@ -9,7 +9,8 @@
  *           (et ne pourra plus en demander avant la prochaine manche)
  */
 typedef enum Action {
-    EMPTY_ACTION
+    HIT,
+    STAND
 } Action;
 
 /**

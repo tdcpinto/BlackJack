@@ -10,7 +10,10 @@
  *  - Trèfle   (Club)
  */
 typedef enum  {
-    EMPTY_SUIT
+    SPADES,
+    DIAMONDS,
+    CLUBS,
+    HEARTS
 } Suit;
 
 /**

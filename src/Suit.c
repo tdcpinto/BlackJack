@@ -1,5 +1,10 @@
 #include "Suit.h"
 
+#include "Utils.h"
+
+#include <string.h>
+#include <stdio.h>
+
 /**
  * Cette fonction met dans la chaîne de caractères
  * `buffer` la couleur `c` sous forme de texte.
@@ -10,8 +15,16 @@
  * La fonction retourne un pointeur vers la fin du buffer.
  */
 char * suit_to_string(Suit c, char * buffer) {
-    return buffer;
+    switch(c) {
+        case SPADES: buffer = strcpy(buffer, "spades"); break;
+        case CLUBS: buffer = strcpy(buffer, "clubs"); break;
+        case HEARTS: buffer = strcpy(buffer, "hearts"); break;
+        case DIAMONDS: buffer = strcpy(buffer, "diamonds"); break;
+        default: buffer = strcpy(buffer, "unknown"); break;
+    }
+    return buffer + strlen(buffer);
 }
+
 
 /**
  * Cette fonction met dans la chaîne de caractères 'buffer'
@@ -23,7 +36,29 @@ char * suit_to_string(Suit c, char * buffer) {
  * La fonction retourne un pointeur vers la fin du buffer.
  */
 char * suit_to_symbol(Suit c, char * buffer) {
-    return buffer;
+    buffer[0] = '\033';
+    buffer[1] = '[';
+    buffer[2] = '3';
+    switch(c) {
+        case SPADES:    buffer[3] = '7';
+                        buffer[4] = 'm';
+                        buffer = strcpy(buffer + 5, "♠\033[0m"); 
+                        break;
+        case CLUBS:     buffer[3] = '7';
+                        buffer[4] = 'm';
+                        buffer = strcpy(buffer + 5, "♣\033[0m"); 
+                        break;
+        case HEARTS:    buffer[3] = '1';
+                        buffer[4] = 'm';
+                        buffer = strcpy(buffer + 5, "♥\033[0m"); 
+                        break;
+        case DIAMONDS:  buffer[3] = '1';
+                        buffer[4] = 'm';
+                        buffer = strcpy(buffer + 5, "♦\033[0m"); 
+                        break;
+        default: buffer = strcpy(buffer, "?"); break;
+    }
+    return buffer + strlen(buffer);
 }
 
 /**
@@ -43,5 +78,7 @@ char * suit_to_symbol(Suit c, char * buffer) {
  * En particulier, '\033', '[', '3', '1' et 'm' sont des caractères différents.
  */
 void print_suit(Suit c) {
-
+    char buffer[MAX_STR];
+    suit_to_string(c, buffer);
+    printf("%s", buffer);
 }
