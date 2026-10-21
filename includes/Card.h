@@ -9,7 +9,8 @@
  * de représenter une carte à jouer classique.
  */
 typedef struct Card {
-    
+    Value value;
+    Suit suit;
 } Card;
 
 /**

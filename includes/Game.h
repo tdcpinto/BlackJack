@@ -1,6 +1,7 @@
 #ifndef GAME_H_
 #define GAME_H_
 
+#include "Deck.h"
 #include "Player.h"
 
 /**
@@ -38,7 +39,7 @@
  * Les joueurs doivent miser *avant* de voir leurs deux premières cartes.
  * S'ils ne misent rien, ils ne jouent pas cette manche.
  * S'ils misent de l'argent, ils perdent tout en cas de défaite, et gagnent
- * leur mise en cas de victoire.
+ * le double de leur mise en cas de victoire.
  * En cas d'égalité, le joueur récupère sa mise.
  *
  * Après chaque manche, le jeu de carte n'est pas modifié (les cartes déjà tirées
@@ -46,24 +47,19 @@
  * Lorsque le paquet est vide, on reprend toutes les cartes déjà tirées, on les mélange
  * et on les remet dans le paquet.
  * Attention : les cartes en jeu au moment où le paquet est vide ne sont pas remises dans le paquet.
- *
- * Indice(s) : vous aurez probablement envie de manipuler trois paquets de cartes.
- * 1. Les cartes du paquet en jeu.
- * 2. Les cartes actuellement visible et en jeu (les cartes des joueurs, la carte visible
- * du dealer).
- * 3. Les cartes défaussées.
  */
 typedef struct Game {
-    
+    Player players[MAX_PLAYERS];
+    unsigned int bets[MAX_PLAYERS];
+    Player dealer;
+    unsigned int num_players;
+    Deck deck;
+    Deck in_play_deck;
+    Deck discarded_deck;
 } Game;
-
-// N'HÉSITEZ PAS À AJOUTER BEAUCOUP D'AFFICHAGE DANS LES FONCTIONS
-// DE CE FICHIER, AFIN DE VOIR COMMENT LA PARTIE SE DÉROULE
 
 /**
  * Cette fonction crée une nouvelle partie de BlackJack avec les joueurs donnés.
- * En particulier, cette fonction crée un nouveau jeu de cartes
- * et le mélange.
  */
 Game create_game(Player * players, unsigned int num_players);
 
@@ -74,7 +70,7 @@ Game create_game(Player * players, unsigned int num_players);
  * ne participe pas à la manche.
  * La fonction retourne le nombre de joueurs ayant placé une mise non nulle.
  */
-unsigned int set_bets(Game * game);
+unsigned set_bets(Game * game);
 
 /**
  * Cette fonction ajoute une carte à la liste de carte en jeu.
@@ -89,7 +85,7 @@ void add_discarded_card(Game * game, Card c);
 /**
  * Cette fonction permet de piocher une carte du paquet en jeu.
  * La fonction retourne la carte piochée.
- * Si le paquet est vide, toutes les cartes déjà défaussées sont remises
+ * Si le paquet est vide, toutes les cartes déjà tirées sont remises
  * dans le paquet en jeu et le paquet est mélangé.
  */
 Card get_card(Game * game);
@@ -110,26 +106,21 @@ Card deal_initial_cards(Game * game);
 void play_players(Game * game);
 
 /**
- * Cette fonction fait jouer le dealer tant que sa main
- * ne vaut pas au moins 17 points.
+ * Cette fonction fait jouer le dealer jusqu'à
+ * ce qu'il dépasse 17 points.
  * Cette fonction prend en paramètre la carte pas encore
  * révélée du dealer.
  */
 void play_dealer(Game * game, Card hidden);
 
 /**
- * Cette fonction compare le score de chaque joueur à celui
+ * Cette fonction compare le score de chaque joueur a celui
  * du dealer.
- * On applique les règles dans l'ordre suivant.
- * 1. Si le joueur a dépassé 21, il perd sa mise.
- * 2. Si le dealer a un score supérieur à 21,
- *    le joueur gagne sa mise.
- * 3. Si le dealer a un score inférieur ou égal à 21, 
- *    et que le joueur a un score inférieur à celui du dealer, 
- *    le joueur perd sa mise.
- * 4. Si le joueur a un score supérieur à celui du dealer, il gagne sa mise.
- * 5. Si le joueur a exactement le même score que le dealer, 
- *    il ne gagne ni ne perd sa mise.
+ * Tout joueur ayant un scorep lus faible que le dealer,
+ * ou supérieur à 21 perd sa mise.
+ * Tout joueur ayant exactement le score du dealer, sans dépasser 21
+ * ne gagnent et ne perdent rien.
+ * Les autres gagnent leurs mises.
  */
 void end_round(Game * game);
 

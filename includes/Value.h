@@ -2,7 +2,7 @@
 #define VALUE_H_
 
 /**
- * Votre énumération pour les valeurs d'une carte.
+ * Votre enumération pour les valeurs d'une carte.
  * Les valeurs possibles sont :
  *  - As (Ace)
  *  - Deux (Two)

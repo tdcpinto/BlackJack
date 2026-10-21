@@ -2,11 +2,11 @@
 #define ACTION_H_
 
 /**
- * Votre énumération pour les actions possibles d'un joueur.
- * Les actions possibles au BlackJack sont :
+ * Votre enumération pour les actions possibles d'un joueur.
+ * Les actions possibles aux blackjack sont :
  * - HIT : le joueur demande une carte supplémentaire
  * - STAND : le joueur ne demande pas de carte supplémentaire 
- *           (et ne pourra plus en demander avant la prochaine manche)
+ * (et ne pourra plus en demander avant la prochaine manche)
  */
 typedef enum Action {
     HIT,

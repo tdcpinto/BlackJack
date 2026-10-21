@@ -1,49 +1,74 @@
 #include "Game.h"
+#include "Deck.h"
+#include "Player.h"
+
+#include <stdio.h>
+#include <stdlib.h>
 
 /**
  * Cette fonction crée une nouvelle partie de BlackJack avec les joueurs donnés.
- * En particulier, cette fonction crée un nouveau jeu de cartes
- * et le mélange.
  */
 Game create_game(Player * players, unsigned int num_players) {
-    Game g;
-    return g;
+    Game game;
+    game.num_players = num_players;
+    for(unsigned int i = 0; i < num_players; i++) {
+        game.players[i] = players[i];
+    }
+    game.in_play_deck = create_empty_deck();
+    game.discarded_deck = create_empty_deck();
+    game.deck = create_standard_deck();
+    game.dealer = create_player("Dealer", NULL, NULL, 0);
+    return game;
 }
 
 /**
- * Cette fonction détermine quelle mise chaque joueur
- * place pour cette manche.
- * Si la mise est zéro, on considère que le joueur
- * ne participe pas à la manche.
- * La fonction retourne le nombre de joueurs ayant placé une mise non nulle.
+ * Cette fonction détermine quels joueurs veulent jouer la
+ * la manche suivante.
+ * Pour ce faire, elle demande à chaque joueur quelle mise ils
+ * souhaitent parier, et si leur mise est égale à zéro, ils ne jouent pas cette manche.
+ * Les joueurs jouant la manche sont stockés dans le tableau de joueurs
+ * `active_players` donné en paramètre.
+ * La fonction renvoie le nombre de joueurs actifs.
  */
 unsigned int set_bets(Game * game) {
-    return 0;
+    unsigned int count = 0;
+    for(unsigned int i = 0; i < game->num_players; i++) {
+        Player player = game->players[i];
+        unsigned int bet = player.choose_bet(game->discarded_deck, player.money);
+        if(bet > player.money) bet = 0;
+        game->bets[i] = bet;
+        if(bet > 0) count++;
+    }
+    return count;
 }
 
 /**
  * Cette fonction ajoute une carte à la liste de carte en jeu.
  */
 void add_in_play_card(Game * game, Card c) {
-
+    add_card(&(game->in_play_deck), c);
 }
 
 /**
  * Cette fonction ajoute une carte au paquet de cartes défaussées.
  */
 void add_discarded_card(Game * game, Card c) {
-
+    add_card(&(game->discarded_deck), c);
 }
 
 /**
  * Cette fonction permet de piocher une carte du paquet en jeu.
  * La fonction retourne la carte piochée.
- * Si le paquet est vide, toutes les cartes déjà défaussées sont remises
+ * Si le paquet est vide, toutes les cartes déjà tirées sont remises
  * dans le paquet en jeu et le paquet est mélangé.
  */
 Card get_card(Game * game) {
-    Card c;
-    return c;
+    if(is_deck_empty(game->deck)) {
+        game->deck = merge_decks(game->deck, game->discarded_deck);
+        game->discarded_deck = create_empty_deck();
+        shuffle_deck(&(game->deck));
+    }
+    return draw_card(&(game->deck));
 }
 
 /**
@@ -51,47 +76,80 @@ Card get_card(Game * game) {
  * ainsi qu'au dealer.
  * Attention, les cartes distribuées sont visibles de tous (en jeu),
  * sauf la seconde carte du dealer.
- * La fonction retourne la carte cachée du dealer.
  */
 Card deal_initial_cards(Game * game) {
-    Card c;
-    return c;
+    for(unsigned int i = 0; i < game->num_players; i++) {
+        if(game->bets[i] == 0) continue;
+        Player * player = &(game->players[i]);
+        Card a = get_card(game);
+        Card b = get_card(game);
+        give_card(player, a);
+        give_card(player, b);
+        add_in_play_card(game, a);
+        add_in_play_card(game, b);
+    }
+    Card a = get_card(game);
+    Card b = get_card(game);
+    give_card(&(game->dealer), a);
+    add_in_play_card(game, a);
+    return b;
 }
 
 /**
- * Cette fonction fait jouer chaque joueur jusqu'à ce
- * que chacun décide de s'arrêter (STAND).
+ * Cette fonction fait jouer un joueur jusqu'à ce
+ * qu'il décide de s'arrêter (STAND).
+ * Le joueur actuel est celui passé en paramètre (`active_player`).
  */
 void play_players(Game * game) {
-
+    for(unsigned int i = 0; i < game->num_players; i++) {
+        if(game->bets[i] == 0) continue;
+        Player * player = &(game->players[i]);
+        Deck known_cards = merge_decks(game->in_play_deck, game->discarded_deck);
+        Deck hand = player->hand;
+        while(get_score(*player) <= 21 && player->choose_action(hand, known_cards) == HIT) {
+            Card a = get_card(game);
+            give_card(player, a);
+            add_in_play_card(game, a);
+            known_cards = merge_decks(game->in_play_deck, game->discarded_deck);
+            hand = player->hand;
+        }
+    }
 }
 
 /**
- * Cette fonction fait jouer le dealer tant que sa main
- * ne vaut pas au moins 17 points.
- * Cette fonction prend en paramètre la carte pas encore
- * révélée du dealer.
+ * Cette fonction fait jouer le dealer jusqu'à
+ * ce qu'il dépasse 17 points.
  */
 void play_dealer(Game * game, Card hidden) {
-
+    Player * dealer = &(game->dealer);
+    give_card(dealer, hidden);
+    add_in_play_card(game, hidden);
+    while(get_score(*dealer) < 17) {
+        Card c = get_card(game);
+        give_card(dealer, c);
+        add_in_play_card(game, c);
+    }
 }
 
 /**
- * Cette fonction compare le score de chaque joueur à celui
+ * Cette fonction compare le score de chaque joueur a celui
  * du dealer.
- * On applique les règles dans l'ordre suivant.
- * 1. Si le joueur a dépassé 21, il perd sa mise.
- * 2. Si le dealer a un score supérieur à 21,
- *    le joueur gagne sa mise.
- * 3. Si le dealer a un score inférieur ou égal à 21, 
- *    et que le joueur a un score inférieur à celui du dealer, 
- *    le joueur perd sa mise.
- * 4. Si le joueur a un score supérieur à celui du dealer, il gagne sa mise.
- * 5. Si le joueur a exactement le même score que le dealer, 
- *    il ne gagne ni ne perd sa mise.
+ * Tout joueur ayant un score plus faible que le dealer,
+ * ou supérieur à 21 perd sa mise.
+ * Les autres gagnent leurs mises.
  */
 void end_round(Game * game) {
-
+    unsigned int dealer_score = get_score(game->dealer);
+    for(unsigned int i = 0; i < game->num_players; i++) {
+        if(game->bets[i] == 0) continue;
+        Player * player = &(game->players[i]);
+        unsigned int score = get_score(*player);
+        if(score <= 21 && score > dealer_score) {
+            player->money = player->money + game->bets[i];
+        } else if(score > 21 || score < dealer_score) {
+            player->money = player->money - game->bets[i];
+        }
+    }
 }
 
 /**
@@ -101,7 +159,12 @@ void end_round(Game * game) {
  * Cette fonction ne doit pas mélanger le paquet restant ou le modifier.
  */
 void clear_hands(Game * game) {
-
+    for(unsigned int i = 0; i < game->num_players; i++) {
+        empty_hand(&(game->players[i]));
+    }
+    empty_hand(&(game->dealer));
+    game->discarded_deck = merge_decks(game->discarded_deck, game->in_play_deck);
+    game->in_play_deck = create_empty_deck();
 }
 
 /**
@@ -113,7 +176,13 @@ void clear_hands(Game * game) {
  * S'il n'y a pas de joueurs restant, cette fonction ne fait rien.
  */
 void play_round(Game * game) {
-
+    unsigned int active_players = set_bets(game);
+    if(active_players == 0) return;
+    Card hidden = deal_initial_cards(game);
+    play_players(game);
+    play_dealer(game, hidden);
+    end_round(game);
+    clear_hands(game);
 }
 
 /**
@@ -121,5 +190,7 @@ void play_round(Game * game) {
  * Pour chaque joueur, on affiche son nom et son argent actuel.
  */
 void show_players(Game game) {
-
+    for(unsigned int i = 0; i < game.num_players; i++) {
+        printf("Nom: %s (%u)\n", game.players[i].name, game.players[i].money);
+    }
 }

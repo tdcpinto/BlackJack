@@ -2,16 +2,16 @@
 #define DECK_H_
 
 #include "Card.h"
+#include "Utils.h"
 
 /**
  * Votre structure pour représenter un jeu de cartes.
  * Un jeu de carte classique contient 52 cartes.
- * On utilisera la même structure pour représenter la main d'un joueur
- * (on peut utiliser un typedef pour renommer `Deck` en
- * `Hand` afin de clarifier le code).
+ * On utilisera la même structure pour représenter la main d'un joueur.
  */
 typedef struct Deck {
-
+    Card cards[MAX_CARDS];
+    unsigned int top;
 } Deck;
 
 /**
@@ -55,8 +55,8 @@ Card draw_card(Deck * deck);
 /**
  * Cette fonction mélange le paquet de cartes.
  * On donne une technique classique pour mélanger un paquet.
- * Pour chaque carte du paquet à la position i (de 0 à la fin du paquet) :
- *    a. Générer un indice aléatoire j (de i à la fin du paquet)
+ * Pour chaque carte du paquet à la position i (de 0 à 51) :
+ *    a. Générer un indice aléatoire j (de i à 51)
  *    b. Échanger les cartes à la position i et j
  */
 void shuffle_deck(Deck * deck);

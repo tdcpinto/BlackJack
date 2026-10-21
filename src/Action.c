@@ -2,8 +2,8 @@
 
 #include "Utils.h"
 
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
 /**
  * Cette fonction met dans la chaîne de caractères

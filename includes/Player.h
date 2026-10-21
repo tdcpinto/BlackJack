@@ -4,6 +4,7 @@
 #include "Action.h"
 #include "Card.h"
 #include "Deck.h"
+#include "Utils.h"
 
 /**
  * Ce type est un peu particulier : il s'agit d'un pointeur vers une fonction.
@@ -33,7 +34,11 @@ typedef unsigned int (*BetFunction)(Deck, unsigned int);
  * Cette structure représente un joueur.
  */
 typedef struct Player {
-    
+    char name[MAX_NAME];
+    Deck hand;
+    ActionFunction choose_action;
+    BetFunction choose_bet;
+    unsigned int money;
 } Player;
 
 /**
@@ -42,10 +47,6 @@ typedef struct Player {
  * une fonction pour choisir l'action à effectuer,
  * une fonction pour choisir combien miser,
  * et une somme d'argent initiale.
- *
- * Si le concept des ActionFunction et BetFunction
- * est compliqué, vous pouvez simplement donner
- * `NULL` pour ces deux paramètres.
  */
 Player create_player(
     char * name, 

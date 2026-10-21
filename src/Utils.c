@@ -4,10 +4,6 @@
 
 int init = 0;
 
-/**
- * Cette fonction renvoie un nombre aléatoire entre min
- * et max (tout deux inclus).
- */
 int get_random_number(int min, int max) {
     if (!init) {
         srand(time(NULL));

@@ -1,4 +1,8 @@
 #include "Player.h"
+#include "Deck.h"
+
+#include <string.h>
+#include <stdio.h>
 
 /**
  * Cette fonction crée un nouveau joueur.
@@ -6,45 +10,54 @@
  * une fonction pour choisir l'action à effectuer,
  * une fonction pour choisir combien miser,
  * et une somme d'argent initiale.
- *
- * Si le concept des ActionFunction et BetFunction
- * est compliqué, vous pouvez simplement donner
- * `NULL` pour ces deux paramètres.
  */
-Player create_player(
-    char * name, 
-    ActionFunction choose_action, 
-    BetFunction choose_bet, 
-    unsigned int money
-) {
-    Player p;
-    return p;
+Player create_player(char * name, ActionFunction choose_action, BetFunction choose_bet, unsigned int money) {
+    Player player;
+    unsigned int name_length = strlen(name) + 1;
+    strncpy(player.name, name, name_length);
+    player.hand = create_empty_deck();
+    player.choose_action = choose_action;
+    player.choose_bet = choose_bet;
+    player.money = money;
+    return player;
 }
 
 /**
  * Cette fonction permet de donner une carte à un joueur.
  */
 void give_card(Player * player, Card card) {
-
+    add_card(&(player->hand), card);
 }
 
 /**
  * Cette fonction retourne le score de la main du joueur.
- * Afin de calculer le score avec les AS, on peut suivre l'algorithme suivant :
- * 1. On calcule le score en considérant que tous les AS valent 11.
- *    De plus, on garde en mémoire le nombre total d'AS dans la main du joueur.
- * 2. Tant que le score du joueur est supérieur à 21, et qu'il reste au moins un AS
- *    dans sa main, on soustrait 10 du score et on décrémente le nombre d'AS.
  */
 unsigned int get_score(Player player) {
-    return 0;
+    unsigned int score = 0;
+    unsigned int aces_count = 0;
+    for(unsigned int i = 0; i < get_deck_size(player.hand); i++) {
+        Card c = player.hand.cards[i];
+        if(c.value >= TWO && c.value <= TEN) {
+            score += c.value;
+        } else if(c.value >= JACK && c.value <= KING) {
+            score += 10;
+        } else if(c.value == ACE) {
+            aces_count++;
+            score += 11;
+        }
+    }
+    while(score > 21 && aces_count > 0) {
+        score -= 10;
+        aces_count--;
+    }
+    return score;
 }
 
 /**
  * Cette fonction vide la main du joueur.
  */
 void empty_hand(Player * player) {
-
+    player->hand = create_empty_deck();
 }
 
 /**
@@ -52,19 +65,23 @@ void empty_hand(Player * player) {
  * On suppose que le buffer fourni est suffisamment grand pour contenir le nom du joueur.
  */
 void get_name(Player player, char * buffer) {
-
+    unsigned int name_length = strlen(player.name) + 1;
+    strncpy(buffer, player.name, name_length);
 }
 
 /**
  * Cette fonction retourne l'argent du joueur.
  */
 unsigned int get_money(Player player) {
-    return 0;
+    return player.money;
 }
 
 /**
  * Affiche les informations d'un joueur (nom, main, argent).
  */
 void show_player(Player player) {
-    
+    printf("Player: %s\n", player.name);
+    printf("Money: %u\n", player.money);
+    printf("Hand: ");
+    show_deck(player.hand);
 }

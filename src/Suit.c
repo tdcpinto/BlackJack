@@ -1,9 +1,8 @@
 #include "Suit.h"
-
 #include "Utils.h"
 
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
 /**
  * Cette fonction met dans la chaîne de caractères
@@ -24,7 +23,6 @@ char * suit_to_string(Suit c, char * buffer) {
     }
     return buffer + strlen(buffer);
 }
-
 
 /**
  * Cette fonction met dans la chaîne de caractères 'buffer'
@@ -62,8 +60,7 @@ char * suit_to_symbol(Suit c, char * buffer) {
 }
 
 /**
- * Cette fonction affiche directement la couleur `c`
- * sous forme lisible.
+ * Cette fonction affiche directement la couleur `c`.
  *
  * Facultatif : 
  * Pour rendre l'affichage plus beau, on peut utiliser
